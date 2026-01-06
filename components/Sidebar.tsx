@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import {
   Github,
@@ -9,12 +10,13 @@ import {
   Target,
   X,
 } from 'lucide-react';
+import Link from 'next/link';
 const Sidebar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   return (
     <div
-      className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white p-6 flex flex-col h-full transform transition-transform duration-300 ${
+      className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white p-6 flex flex-col h-full justify-between transform transition-transform duration-300 ${
         isMobileMenuOpen
           ? 'translate-x-0'
           : '-translate-x-full lg:translate-x-0'
@@ -41,8 +43,9 @@ const Sidebar = () => {
           { id: 'performance', icon: TrendingUp, label: 'Performance' },
           { id: 'goals', icon: Target, label: 'Objetivos' },
         ].map((item) => (
-          <button
+          <Link
             key={item.id}
+            href={`/${item.id}`}
             onClick={() => {
               setActiveTab(item.id);
               setIsMobileMenuOpen(false);
@@ -53,7 +56,7 @@ const Sidebar = () => {
           >
             <item.icon size={20} />
             <span>{item.label}</span>
-          </button>
+          </Link>
         ))}
       </nav>
 

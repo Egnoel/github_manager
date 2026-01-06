@@ -10,6 +10,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { allRepos, ModalStates } from '@/data';
+import Modal from '@/components/Modal';
 
 const RepositoriesView = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,6 +44,46 @@ const RepositoriesView = () => {
           <Plus size={20} />
           Novo Repositório
         </button>
+         <Modal
+        isOpen={modalOpen === 'newRepo'}
+        onClose={() => setModalOpen(null)}
+        title="Novo Repositório"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nome do repositório
+            </label>
+            <input
+              type="text"
+              placeholder="meu-projeto"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Descrição
+            </label>
+            <textarea
+              placeholder="Descrição do projeto..."
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="checkbox" id="private" className="rounded" />
+            <label htmlFor="private" className="text-sm text-gray-700">
+              Repositório privado
+            </label>
+          </div>
+          <button
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            type="button"
+          >
+            Criar repositório
+          </button>
+        </div>
+      </Modal>
       </div>
 
       {/* Search and Filter */}

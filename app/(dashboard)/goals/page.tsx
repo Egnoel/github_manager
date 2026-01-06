@@ -2,6 +2,7 @@
 import { Calendar, Plus, Check } from 'lucide-react';
 import { goals, ModalStates } from '@/data';
 import { useState } from 'react';
+import Modal from '@/components/Modal';
 const GoalsView = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [modalOpen, setModalOpen] = useState<ModalStates | null>(null);
@@ -29,6 +30,71 @@ const GoalsView = () => {
           <Plus size={20} />
           Novo Objetivo
         </button>
+        <Modal
+        isOpen={modalOpen === 'newGoal'}
+        onClose={() => setModalOpen(null)}
+        title="Novo Objetivo"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Título do objetivo
+            </label>
+            <input
+              type="text"
+              placeholder="Ex: Fazer 50 commits este mês"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta
+              </label>
+              <input
+                type="number"
+                placeholder="50"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Prazo (dias)
+              </label>
+              <input
+                type="number"
+                placeholder="30"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-700 mb-2"
+              htmlFor="tipo"
+            >
+              Tipo
+            </label>
+            <select
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="tipo"
+              name="tipo"
+              id="tipo"
+            >
+              <option>Commits</option>
+              <option>Pull Requests</option>
+              <option>Code Reviews</option>
+              <option>Issues</option>
+            </select>
+          </div>
+          <button
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            type="button"
+          >
+            Criar objetivo
+          </button>
+        </div>
+      </Modal>
       </div>
 
       {/* Goals Grid */}

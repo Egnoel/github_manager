@@ -11,11 +11,21 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { ModalStates } from '@/data';
+import { useTheme } from "next-themes"
+
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const SettingsView = () => {
   const [modalOpen, setModalOpen] = useState<ModalStates | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [settingsTab, setSettingsTab] = useState('profile');
+  const { setTheme } = useTheme()
   return (
     <div className={`p-4 lg:p-8 space-y-6 ${isDarkMode ? 'text-white' : ''}`}>
       <div>
@@ -217,44 +227,26 @@ const SettingsView = () => {
                 Aparência
               </h2>
 
-              <div>
-                <label
-                  className={`block text-sm font-medium ${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                  } mb-4`}
-                >
-                  Tema
-                </label>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { id: 'light', label: 'Claro', icon: Sun },
-                    { id: 'dark', label: 'Escuro', icon: Moon },
-                    { id: 'auto', label: 'Auto', icon: Smartphone },
-                  ].map((theme) => (
-                    <button
-                      key={theme.id}
-                      onClick={() => setIsDarkMode(theme.id === 'dark')}
-                      className={`p-4 border-2 ${
-                        (theme.id === 'dark' && isDarkMode) ||
-                        (theme.id === 'light' && !isDarkMode)
-                          ? 'border-blue-600 bg-blue-50 dark:bg-blue-900'
-                          : isDarkMode
-                          ? 'border-gray-700 hover:border-gray-600'
-                          : 'border-gray-200 hover:border-gray-300'
-                      } rounded-lg transition-colors`}
-                    >
-                      <theme.icon className="mx-auto mb-2" size={32} />
-                      <p
-                        className={`text-center font-medium ${
-                          isDarkMode ? 'text-white' : 'text-gray-900'
-                        }`}
-                      >
-                        {theme.label}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
+             <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          System
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
 
               <div>
                 <label

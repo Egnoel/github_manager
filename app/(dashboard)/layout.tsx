@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import './globals.css';
+import '../globals.css';
 import Sidebar from '@/components/Sidebar';
 import { ThemeProvider } from '@/components/theme-provider';
 
@@ -35,11 +35,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div
-            className="flex min-h-screen 
-       transition-colors duration-300"
-          >
-            {children}
+          <div className="flex min-h-screen transition-colors duration-300 min-w-full">
+            <Sidebar />
+            <div className="flex-1">{children}</div>
           </div>
         </ThemeProvider>
       </body>

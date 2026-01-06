@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useState } from 'react';
 import {
   BarChart,
@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Star,
   Download,
+  Check,
 } from 'lucide-react';
 import {
   allRepos,
@@ -27,27 +28,20 @@ import {
   languageData,
   ModalStates,
 } from '@/data';
+import Modal from '@/components/Modal';
 
 const DashboardView = () => {
   const [modalOpen, setModalOpen] = useState<ModalStates | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   return (
-    <div className={`p-4 lg:p-8 space-y-6 ${isDarkMode ? 'text-white' : ''}`}>
+    <div className={`p-4 lg:p-8 space-y-6 text-gray-600`}>
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
         <div>
-          <h1
-            className={`text-2xl lg:text-3xl font-bold ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}
-          >
+          <h1 className={`text-2xl lg:text-3xl font-bold text-white`}>
             Bem-vindo, Developer! 👋
           </h1>
-          <p
-            className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}
-          >
-            Aqui está o seu resumo de atividade
-          </p>
+          <p className="text-white mt-1">Aqui está o seu resumo de atividade</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -61,12 +55,106 @@ const DashboardView = () => {
             <Download size={20} />
             <span className="hidden lg:inline">Exportar</span>
           </button>
+           <Modal
+        isOpen={modalOpen === 'export'}
+        onClose={() => setModalOpen(null)}
+        title="Exportar Relatórios"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Selecione o tipo de relatório que deseja exportar
+          </p>
+
+          <div className="space-y-3">
+            {[
+              {
+                type: 'Atividade Completa',
+                desc: 'Commits, PRs, Issues (último ano)',
+                format: 'PDF',
+              },
+              {
+                type: 'Performance Mensal',
+                desc: 'Métricas e insights do mês',
+                format: 'PDF',
+              },
+              {
+                type: 'Repositórios',
+                desc: 'Lista completa com estatísticas',
+                format: 'CSV',
+              },
+              {
+                type: 'Objetivos',
+                desc: 'Progresso e conquistas',
+                format: 'PDF',
+              },
+            ].map((report, i) => (
+              <div
+                key={i}
+                className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{report.type}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{report.desc}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                      {report.format}
+                    </span>
+                    <Download size={20} className="text-gray-400" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <Download size={20} />
+              Exportar todos os relatórios (ZIP)
+            </button>
+          </div>
+        </div>
+      </Modal>
           <button
             onClick={() => setModalOpen('sync')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Sincronizar
           </button>
+          <Modal
+            isOpen={modalOpen === 'sync'}
+            onClose={() => setModalOpen(null)}
+            title="Sincronizar com GitHub"
+          >
+            <div className="space-y-4">
+              <p className="text-gray-600">Última sincronização: Há 2 horas</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm">Repositórios</span>
+                  <Check className="text-green-500" size={20} />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm">Issues</span>
+                  <Check className="text-green-500" size={20} />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm">Pull Requests</span>
+                  <Check className="text-green-500" size={20} />
+                </div>
+              </div>
+              <button
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                title="sincronizar"
+                type="button"
+              >
+                Sincronizar agora
+              </button>
+            </div>
+          </Modal>
         </div>
       </div>
 
