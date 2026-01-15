@@ -1,31 +1,66 @@
 'use client';
-import { useState } from 'react';
-import {
-  Moon,
-  Sun,
-  Bell,
-  User,
-  Lock,
-  Palette,
-  Globe,
-  Smartphone,
-} from 'lucide-react';
-import { ModalStates } from '@/data';
-import { useTheme } from "next-themes"
+import { useState, useEffect } from 'react';
+import { Moon, Sun, Bell, User, Lock, Palette, Globe } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import Image from 'next/image';
+import { useGitHubAuth } from '@/hooks/useGitHubAuth';
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
+
+interface GitHubUserData {
+  name: string | null;
+  login: string;
+  email: string | null;
+  bio: string | null;
+  avatar_url: string;
+}
 
 const SettingsView = () => {
-  const [modalOpen, setModalOpen] = useState<ModalStates | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode] = useState(false);
   const [settingsTab, setSettingsTab] = useState('profile');
-  const { setTheme } = useTheme()
+  const { setTheme } = useTheme();
+  const { user } = useGitHubAuth();
+  const [githubUser, setGitHubUser] = useState<GitHubUserData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchGitHubUserData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/github/user', {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setGitHubUser({
+            name: data.name || null,
+            login: data.login || '',
+            email: data.email || null,
+            bio: data.bio || null,
+            avatar_url: data.avatar_url || '',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching GitHub user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGitHubUserData();
+  }, [user]);
   return (
     <div className={`p-4 lg:p-8 space-y-6 ${isDarkMode ? 'text-white' : ''}`}>
       <div>
@@ -34,10 +69,10 @@ const SettingsView = () => {
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}
         >
-          Configurações
+          Settings
         </h1>
         <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-          Gerencie suas preferências e conta
+          Manage your preferences and account
         </p>
       </div>
 
@@ -52,11 +87,11 @@ const SettingsView = () => {
         >
           <nav className="space-y-1">
             {[
-              { id: 'profile', icon: User, label: 'Perfil' },
-              { id: 'appearance', icon: Palette, label: 'Aparência' },
-              { id: 'notifications', icon: Bell, label: 'Notificações' },
-              { id: 'privacy', icon: Lock, label: 'Privacidade' },
-              { id: 'integrations', icon: Globe, label: 'Integrações' },
+              { id: 'profile', icon: User, label: 'Profile' },
+              { id: 'appearance', icon: Palette, label: 'Appearance' },
+              { id: 'notifications', icon: Bell, label: 'Notifications' },
+              { id: 'privacy', icon: Lock, label: 'Privacy' },
+              { id: 'integrations', icon: Globe, label: 'Integrations' },
             ].map((item) => (
               <button
                 key={item.id}
@@ -94,22 +129,37 @@ const SettingsView = () => {
                     isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}
                 >
-                  Informações do Perfil
+                  Profile Information
                 </h2>
                 <div className="flex items-center gap-6 mb-6">
-                  <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
-                    D
-                  </div>
+                  {loading ? (
+                    <div className="w-24 h-24 bg-gray-700 rounded-full animate-pulse" />
+                  ) : githubUser?.avatar_url ? (
+                    <Image
+                      src={githubUser.avatar_url}
+                      alt={githubUser.name || githubUser.login}
+                      width={96}
+                      height={96}
+                      className="w-24 h-24 rounded-full border-2 border-gray-700"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                      {(user?.user_metadata?.full_name || user?.email || 'U')
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                      Alterar foto
+                      Change photo
                     </button>
                     <p
                       className={`text-sm ${
                         isDarkMode ? 'text-gray-400' : 'text-gray-500'
                       } mt-2`}
                     >
-                      PNG, JPG até 5MB
+                      PNG, JPG up to 5MB
                     </p>
                   </div>
                 </div>
@@ -118,42 +168,55 @@ const SettingsView = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
                   <label
+                    htmlFor="full-name"
                     className={`block text-sm font-medium ${
                       isDarkMode ? 'text-gray-300' : 'text-gray-700'
                     } mb-2`}
                   >
-                    Nome completo
+                    Full name
                   </label>
                   <input
+                    id="full-name"
                     type="text"
-                    defaultValue="Developer Name"
+                    defaultValue={
+                      githubUser?.name || user?.user_metadata?.full_name || ''
+                    }
+                    placeholder="Full name"
                     className={`w-full px-4 py-2 border ${
                       isDarkMode
                         ? 'border-gray-600 bg-gray-700 text-white'
-                        : 'border-gray-300'
+                        : 'border-gray-300 bg-white text-gray-900'
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   />
                 </div>
                 <div>
                   <label
+                    htmlFor="github-username"
                     className={`block text-sm font-medium ${
                       isDarkMode ? 'text-gray-300' : 'text-gray-700'
                     } mb-2`}
                   >
-                    Username GitHub
+                    GitHub Username
                   </label>
                   <input
+                    id="github-username"
                     type="text"
-                    defaultValue="@developer"
+                    defaultValue={
+                      githubUser?.login
+                        ? `@${githubUser.login}`
+                        : user?.user_metadata?.user_name || ''
+                    }
+                    placeholder="@username"
                     className={`w-full px-4 py-2 border ${
                       isDarkMode
                         ? 'border-gray-600 bg-gray-700 text-white'
-                        : 'border-gray-300'
+                        : 'border-gray-300 bg-white text-gray-900'
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   />
                 </div>
                 <div className="lg:col-span-2">
                   <label
+                    htmlFor="email"
                     className={`block text-sm font-medium ${
                       isDarkMode ? 'text-gray-300' : 'text-gray-700'
                     } mb-2`}
@@ -161,17 +224,20 @@ const SettingsView = () => {
                     Email
                   </label>
                   <input
+                    id="email"
                     type="email"
-                    defaultValue="developer@email.com"
+                    defaultValue={githubUser?.email || user?.email || ''}
+                    placeholder="email@example.com"
                     className={`w-full px-4 py-2 border ${
                       isDarkMode
                         ? 'border-gray-600 bg-gray-700 text-white'
-                        : 'border-gray-300'
+                        : 'border-gray-300 bg-white text-gray-900'
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   />
                 </div>
                 <div className="lg:col-span-2">
                   <label
+                    htmlFor="bio"
                     className={`block text-sm font-medium ${
                       isDarkMode ? 'text-gray-300' : 'text-gray-700'
                     } mb-2`}
@@ -179,12 +245,14 @@ const SettingsView = () => {
                     Bio
                   </label>
                   <textarea
+                    id="bio"
                     rows={3}
-                    defaultValue="Desenvolvedor full-stack apaixonado por tecnologia"
+                    defaultValue={githubUser?.bio || ''}
+                    placeholder="Tell us about yourself..."
                     className={`w-full px-4 py-2 border ${
                       isDarkMode
                         ? 'border-gray-600 bg-gray-700 text-white'
-                        : 'border-gray-300'
+                        : 'border-gray-300 bg-white text-gray-900'
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   />
                 </div>
@@ -202,10 +270,10 @@ const SettingsView = () => {
                       : 'border-gray-300 hover:bg-gray-50'
                   } rounded-lg transition-colors`}
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Salvar alterações
+                  Save changes
                 </button>
               </div>
             </div>
@@ -227,26 +295,26 @@ const SettingsView = () => {
                 Aparência
               </h2>
 
-             <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                    <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                    <span className="sr-only">Toggle theme</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setTheme('light')}>
+                    Light
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme('dark')}>
+                    Dark
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme('system')}>
+                    System
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <div>
                 <label
@@ -267,6 +335,8 @@ const SettingsView = () => {
                   ].map((color) => (
                     <button
                       key={color}
+                      aria-label={`Select color ${color}`}
+                      title={`Select color ${color}`}
                       className="w-12 h-12 rounded-lg border-2 border-transparent hover:border-gray-400 transition-colors"
                       style={{ backgroundColor: color }}
                     />
@@ -276,22 +346,25 @@ const SettingsView = () => {
 
               <div>
                 <label
+                  htmlFor="interface-density"
                   className={`block text-sm font-medium ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-700'
                   } mb-2`}
                 >
-                  Densidade de interface
+                  Interface density
                 </label>
                 <select
+                  id="interface-density"
+                  aria-label="Interface density"
                   className={`w-full px-4 py-2 border ${
                     isDarkMode
                       ? 'border-gray-600 bg-gray-700 text-white'
-                      : 'border-gray-300'
+                      : 'border-gray-300 bg-white text-gray-900'
                   } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 >
-                  <option>Compacta</option>
-                  <option>Confortável</option>
-                  <option>Espaçada</option>
+                  <option>Compact</option>
+                  <option>Comfortable</option>
+                  <option>Spacious</option>
                 </select>
               </div>
             </div>
@@ -362,6 +435,8 @@ const SettingsView = () => {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
+                        id={`notification-${i}`}
+                        aria-label={notif.label}
                         defaultChecked={i < 4}
                         className="sr-only peer"
                       />
@@ -386,7 +461,7 @@ const SettingsView = () => {
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}
               >
-                Privacidade e Segurança
+                Privacy and Security
               </h2>
 
               <div className="space-y-4">
@@ -401,11 +476,13 @@ const SettingsView = () => {
                         isDarkMode ? 'text-white' : 'text-gray-900'
                       }`}
                     >
-                      Perfil público
+                      Public profile
                     </p>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
+                        id="public-profile"
+                        aria-label="Public profile"
                         defaultChecked
                         className="sr-only peer"
                       />
@@ -417,7 +494,7 @@ const SettingsView = () => {
                       isDarkMode ? 'text-gray-400' : 'text-gray-500'
                     }`}
                   >
-                    Permitir que outros vejam seu perfil e estatísticas
+                    Allow others to see your profile and statistics
                   </p>
                 </div>
 
@@ -431,17 +508,20 @@ const SettingsView = () => {
                       isDarkMode ? 'text-white' : 'text-gray-900'
                     } mb-2`}
                   >
-                    Autenticação de dois fatores
+                    Two-factor authentication
                   </p>
                   <p
                     className={`text-sm ${
                       isDarkMode ? 'text-gray-400' : 'text-gray-500'
                     } mb-3`}
                   >
-                    Adicione uma camada extra de segurança
+                    Add an extra layer of security
                   </p>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                    Ativar 2FA
+                  <button
+                    aria-label="Enable two-factor authentication"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  >
+                    Enable 2FA
                   </button>
                 </div>
 
@@ -455,24 +535,24 @@ const SettingsView = () => {
                       isDarkMode ? 'text-white' : 'text-gray-900'
                     } mb-2`}
                   >
-                    Exportar dados
+                    Export data
                   </p>
                   <p
                     className={`text-sm ${
                       isDarkMode ? 'text-gray-400' : 'text-gray-500'
                     } mb-3`}
                   >
-                    Baixe uma cópia de todos os seus dados
+                    Download a copy of all your data
                   </p>
                   <button
-                    onClick={() => setModalOpen('export')}
+                    aria-label="Request data export"
                     className={`px-4 py-2 border ${
                       isDarkMode
                         ? 'border-gray-600 hover:bg-gray-700'
                         : 'border-gray-300 hover:bg-gray-50'
                     } rounded-lg transition-colors text-sm`}
                   >
-                    Solicitar exportação
+                    Request export
                   </button>
                 </div>
 
@@ -480,13 +560,16 @@ const SettingsView = () => {
                   className={`p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-lg`}
                 >
                   <p className="font-medium text-red-700 dark:text-red-400 mb-2">
-                    Zona de perigo
+                    Danger zone
                   </p>
                   <p className="text-sm text-red-600 dark:text-red-300 mb-3">
-                    Ações irreversíveis para sua conta
+                    Irreversible actions for your account
                   </p>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
-                    Deletar conta
+                  <button
+                    aria-label="Delete account"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                  >
+                    Delete account
                   </button>
                 </div>
               </div>
@@ -506,32 +589,32 @@ const SettingsView = () => {
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}
               >
-                Integrações
+                Integrations
               </h2>
 
               <div className="space-y-4">
                 {[
                   {
                     name: 'GitHub',
-                    status: 'Conectado',
+                    status: 'Connected',
                     icon: '🔗',
                     color: 'green',
                   },
                   {
                     name: 'Slack',
-                    status: 'Desconectado',
+                    status: 'Disconnected',
                     icon: '💬',
                     color: 'gray',
                   },
                   {
                     name: 'Discord',
-                    status: 'Desconectado',
+                    status: 'Disconnected',
                     icon: '🎮',
                     color: 'gray',
                   },
                   {
                     name: 'Jira',
-                    status: 'Desconectado',
+                    status: 'Disconnected',
                     icon: '📋',
                     color: 'gray',
                   },
@@ -554,7 +637,7 @@ const SettingsView = () => {
                         </p>
                         <p
                           className={`text-sm ${
-                            integration.status === 'Conectado'
+                            integration.status === 'Connected'
                               ? 'text-green-600'
                               : isDarkMode
                               ? 'text-gray-400'
@@ -567,16 +650,16 @@ const SettingsView = () => {
                     </div>
                     <button
                       className={`px-4 py-2 ${
-                        integration.status === 'Conectado'
+                        integration.status === 'Connected'
                           ? isDarkMode
                             ? 'border border-gray-600 hover:bg-gray-700'
                             : 'border border-gray-300 hover:bg-gray-50'
                           : 'bg-blue-600 text-white hover:bg-blue-700'
                       } rounded-lg transition-colors text-sm`}
                     >
-                      {integration.status === 'Conectado'
-                        ? 'Desconectar'
-                        : 'Conectar'}
+                      {integration.status === 'Connected'
+                        ? 'Disconnect'
+                        : 'Connect'}
                     </button>
                   </div>
                 ))}

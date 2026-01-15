@@ -1,12 +1,12 @@
 
 const commitData = [
-    { day: 'Seg', commits: 12 },
-    { day: 'Ter', commits: 8 },
-    { day: 'Qua', commits: 15 },
-    { day: 'Qui', commits: 10 },
-    { day: 'Sex', commits: 20 },
-    { day: 'Sáb', commits: 5 },
-    { day: 'Dom', commits: 3 }
+    { day: 'Mon', commits: 12 },
+    { day: 'Tue', commits: 8 },
+    { day: 'Wed', commits: 15 },
+    { day: 'Thu', commits: 10 },
+    { day: 'Fri', commits: 20 },
+    { day: 'Sat', commits: 5 },
+    { day: 'Sun', commits: 3 }
   ];
 
   const performanceData = [

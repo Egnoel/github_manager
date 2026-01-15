@@ -35,10 +35,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div
-            className="flex min-h-screen 
-       transition-colors duration-300"
-          >
+          <div className="min-h-screen transition-colors duration-300">
             {children}
           </div>
         </ThemeProvider>
