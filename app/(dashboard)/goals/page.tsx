@@ -259,12 +259,12 @@ const GoalsView = () => {
               {submitting ? (
                 <>
                   <Loader2 className="animate-spin" size={20} />
-                  Salvando...
+                  Saving...
                 </>
               ) : editingGoal ? (
-                'Salvar alterações'
+                'Save changes'
               ) : (
-                'Criar objetivo'
+                'Create goal'
               )}
             </button>
           </form>
@@ -308,10 +308,10 @@ const GoalsView = () => {
                         <Calendar size={16} />
                         <span>
                           {isOverdue
-                            ? 'Prazo expirado'
+                            ? 'Deadline expired'
                             : isComplete
-                            ? 'Concluído!'
-                            : `Faltam ${formatDeadline(daysRemaining)}`}
+                            ? 'Completed!'
+                            : `Remaining ${formatDeadline(daysRemaining)}`}
                         </span>
                       </div>
                       <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">
@@ -328,7 +328,7 @@ const GoalsView = () => {
 
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-400">Progresso</span>
+                    <span className="text-gray-400">Progress</span>
                     <span className="font-semibold text-white">
                       {goal.current} / {goal.target}
                     </span>
@@ -366,16 +366,16 @@ const GoalsView = () => {
                     className="flex-1 px-4 py-2 border border-gray-600 hover:bg-gray-700 rounded-lg transition-colors text-sm text-gray-300 flex items-center justify-center gap-2"
                   >
                     <Edit size={16} />
-                    Editar
+                    Edit
                   </button>
                   <button
                     onClick={() => handleDelete(goal.id)}
-                    aria-label="Excluir objetivo"
-                    title="Excluir objetivo"
+                    aria-label="Delete goal"
+                    title="Delete goal"
                     className="px-4 py-2 border border-red-500/50 hover:bg-red-500/20 rounded-lg transition-colors text-sm text-red-400 flex items-center justify-center"
                   >
                     <Trash2 size={16} aria-hidden="true" />
-                    <span className="sr-only">Excluir</span>
+                    <span className="sr-only">Delete</span>
                   </button>
                 </div>
               </div>
